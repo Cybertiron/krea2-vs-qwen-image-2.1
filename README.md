@@ -22,6 +22,8 @@ Same 5 prompts × 2 seeds for every variant, 1024×1024, prompt enhancers **off*
 
 **Verdict:** for pure text-to-image, **Krea 2 Turbo wins** — most photographic portraits, best light/mood, best anime scene staging. Base Qwen-Image-2.1 looks noticeably flatter and more washed-out. The Fix LoRA closes much of that gap (more contrast, detail, best text layout) but costs ~3× the time. Qwen-Image-2.1 is better positioned as an **editing** model (that's what it's built for), not as a t2i model.
 
+**Caveat from a reader-spotted artifact:** in the landscape prompt Krea (and Qwen + Fix) drew rowing boats with the oars out and nobody aboard. Only base Qwen drew plausible empty boats. A follow-up [boat logic test](#boat-logic-test) shows that all four variants get it right once the prompt is explicit, so this is a prompt-specificity issue rather than a Krea-only weakness.
+
 **Use the int8 Krea checkpoint on RTX 30xx.** Ampere has no FP8 tensor cores, so the fp8 checkpoint is upcast every layer; `krea2_turbo_int8_convrot` runs on INT8 tensor cores and is **1.78× faster (18.2 s → 10.2 s)** with visually identical output (see the fp8-vs-int8 sheets).
 
 This lines up with the take in [Aitrepreneur's Qwen Image 2.1 video](https://youtu.be/5Sby8YxbhJc) (Oct 2026): Qwen-Image-2.1 shines at editing, while Krea 2 is the stronger text-to-image model. On the [Artificial Analysis open-weights arena](https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true) Qwen-Image-2.1 currently ranks higher — arena Elo and this small, subjective prompt set measure different things, so try your own prompts.
@@ -36,6 +38,9 @@ This lines up with the take in [Aitrepreneur's Qwen Image 2.1 video](https://you
 **Landscape** — Krea nails mist + sunrise; base Qwen is flat and grey; Fix is vivid and sharp but loses most of the fog.
 ![landscape](sheets/landscape_sheet.jpg)
 
+⚠️ **But look at the boats** (full-res crops below, spotted by a reader). The prompt said only *"a lone rowing boat"*. Krea (fp8 and int8) and Qwen + Fix draw the oars **out in rowing position with nobody aboard** — a logic artifact, and in two cases an oar passes straight through the hull. Base Qwen-Image-2.1 is the only variant that drew plausible empty boats both times. The single Krea int8 image with a rower (seed 1001) is luck: the same seed in fp8 has no rower — int8 quantization nudges the sampling path, it doesn't make the model smarter. See the [boat logic test](#boat-logic-test) below.
+![boats](sheets/landscape_boats_crop.jpg)
+
 **Text** — all three spell both signs correctly; Krea once adds a stray comma; Fix produces the cleanest storefront layout.
 ![text](sheets/text_sheet.jpg)
 
@@ -44,6 +49,25 @@ This lines up with the take in [Aitrepreneur's Qwen Image 2.1 video](https://you
 
 **Composition** — every variant gets all objects and relations right; Fix squashes the cat under a too-low table in one seed.
 ![composition](sheets/composition_sheet.jpg)
+
+### Boat logic test
+
+Follow-up to the landscape artifact: two explicit prompts, all 4 variants, **3 seeds** each.
+
+- `boat_rower` — *"…a fisherman … sits in a small wooden rowing boat, gripping both oars and rowing…"*
+- `boat_empty` — *"…an empty small wooden rowing boat … nobody on board, both oars pulled in and lying inside the boat along the seats…"*
+
+| | Rower present & holding oars | Empty, oars inside | Smaller artifacts (full-res check) |
+|---|---|---|---|
+| Krea 2 Turbo fp8 | 3/3 | 3/3 | seed 3003 empty: an oar appears in the reflection but not on the boat |
+| Krea 2 Turbo int8 | 3/3 | 3/3 | same as fp8 (near-identical images) |
+| Qwen-Image-2.1 | 3/3 | 3/3 | seed 1001 rower: a stray "ghost" rod in the water |
+| Qwen 2.1 + Fix LoRA | 3/3 | 3/3 | seed 2002 rower: an extra oar floating in the water; empty seeds 1001/3003: oars lie *across* the boat instead of along the seats, and the reflections don't match |
+
+**Takeaway:** the boat artifact came from an **underspecified prompt**, not from a model that can't reason. *"A rowing boat"* makes every model default to the oars-out rowing pose, and most of them never add the rower. Once the prompt says who is (or isn't) in the boat, all four variants get the main logic right 12/12. Krea follows the *"along the seats"* detail most literally and keeps the best sunrise and fog. The Fix LoRA has the most small physical errors here. **Lesson for any model:** spell out people, poses and object states, and don't rely on the model to infer them.
+
+![boat rower](sheets/boat_rower_sheet.jpg)
+![boat empty](sheets/boat_empty_sheet.jpg)
 
 ### Krea 2 Turbo: fp8 vs int8 (RTX 3090)
 
@@ -87,9 +111,11 @@ python main.py --cuda-device 1 --port 8189
 # generate every variant x prompt x seed (writes results/ + timings.json)
 python scripts/compare.py --port 8189
 python scripts/compare.py --port 8189 --only krea2int8
+python scripts/compare.py --port 8189 --only krea2,krea2int8,qwen21,qwen21fix --prompts boat_rower,boat_empty --seeds 1001,2002,3003
 # build the comparison sheets
 python scripts/sheets.py krea2,qwen21,qwen21fix sheet
 python scripts/sheets.py krea2,krea2int8 fp8_vs_int8
+python scripts/sheets.py krea2,krea2int8,qwen21,qwen21fix sheet boat_rower,boat_empty
 ```
 
 `compare.py` expects to live in a folder next to `ComfyUI/` (it moves outputs from `ComfyUI/output/cmp/`). Edit `PROMPTS` to test your own.

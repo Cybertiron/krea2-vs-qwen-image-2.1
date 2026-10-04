@@ -8,6 +8,7 @@ ap.add_argument("--port", type=int, default=8189)
 ap.add_argument("--seeds", default="1001,2002")
 ap.add_argument("--size", default="1024x1024")
 ap.add_argument("--only", default="")  # comma list of variant names
+ap.add_argument("--prompts", default="portrait,landscape,text,anime_fantasy,composition")  # comma list of PROMPTS keys
 args = ap.parse_args()
 URL = f"http://127.0.0.1:{args.port}"
 W, H = map(int, args.size.split("x"))
@@ -20,6 +21,8 @@ PROMPTS = {
     "landscape": "A misty Nordic fjord at sunrise, a small village of red wooden houses on the shore, steep green cliffs disappearing into low clouds, a calm mirror-like water surface reflecting golden light, a lone rowing boat in the foreground, cinematic wide shot, high detail.",
     "text": "A cozy bakery storefront at dusk with a large chalkboard sign by the door that clearly reads \"FRESH BREAD - 3 COINS\" in neat white hand-lettering, and a painted wooden sign above the window reading \"MOONFLOUR BAKERY\". Warm light glows from inside, loaves visible on shelves.",
     "anime_fantasy": "Anime illustration of an original character: a young witch with short silver hair and amber eyes, wearing a dark blue cloak with brass buttons, standing in a cobblestone medieval town square next to a primitive iron steam engine puffing white smoke, curious townsfolk watching from a distance, late afternoon light, clean lineart, vibrant cel shading, detailed background.",
+    "boat_rower": "A misty Nordic fjord at sunrise, calm mirror-like water reflecting golden light. In the foreground a fisherman in a dark wool sweater sits in a small wooden rowing boat, gripping both oars and rowing, the oar blades dipping into the water. Cinematic wide shot, photorealistic, high detail.",
+    "boat_empty": "A misty Nordic fjord at sunrise, calm mirror-like water reflecting golden light. In the foreground an empty small wooden rowing boat floats alone, nobody on board, both oars pulled in and lying inside the boat along the seats. Cinematic wide shot, photorealistic, high detail.",
     "composition": "A red cube balanced on top of a blue sphere on a wooden table, to the left a transparent glass half-filled with water, to the right a green apple, and under the table a sleeping orange cat. Studio lighting, white background, photorealistic.",
 }
 NEG_QWEN = "low quality, blurry, distorted"
@@ -98,7 +101,8 @@ for vname, fn in VARIANTS.items():
     # warmup = model load, not counted
     dt, _ = run(fn("warmup", 1))
     print(f"[{vname}] warmup/load {dt:.1f}s", flush=True)
-    for pname, ptext in PROMPTS.items():
+    for pname in args.prompts.split(","):
+        ptext = PROMPTS[pname]
         for seed in SEEDS:
             dt, img = run(fn(ptext, seed))
             src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ComfyUI", "output", img["subfolder"], img["filename"])
