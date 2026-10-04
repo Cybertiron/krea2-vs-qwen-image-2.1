@@ -81,6 +81,17 @@ More: [landscape](sheets/landscape_fp8_vs_int8.jpg) · [text](sheets/text_fp8_vs
 
 Raw per-image timings: [timings.json](timings.json).
 
+## Ready-to-use workflow: Krea 2 Turbo int8
+
+[`workflows/image_krea2_turbo_int8_t2i.json`](workflows/image_krea2_turbo_int8_t2i.json) is the official Comfy-Org Krea 2 Turbo text-to-image template, with the diffusion model switched from `krea2_turbo_fp8_scaled` to **`krea2_turbo_int8_convrot`**. The UNETLoader, the model download link and the notes all point to int8. Nothing else changed: 8 steps, CFG 1, euler / simple, optional prompt enhancer and style-LoRA switch.
+
+1. Download [`krea2_turbo_int8_convrot.safetensors`](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_int8_convrot.safetensors) (12.57 GB) into `ComfyUI/models/diffusion_models/`. The text encoder, VAE and LoRA are the same as in the original template.
+2. Drag the JSON into ComfyUI and run it.
+
+It is ~1.78× faster on RTX 30xx (Ampere). On RTX 40xx/50xx, which have FP8 tensor cores, the original fp8 template may be just as fast. Not tested here.
+
+Derived from [Comfy-Org/workflow_templates](https://github.com/Comfy-Org/workflow_templates) `image_krea2_turbo_t2i.json` (MIT).
+
 ## Setup
 
 - GPU: RTX 3090 24 GB (second GPU, `--cuda-device 1`), 128 GB RAM, Windows 10
