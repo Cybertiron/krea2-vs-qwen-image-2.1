@@ -131,6 +131,30 @@ python scripts/sheets.py krea2,krea2int8,qwen21,qwen21fix sheet boat_rower,boat_
 
 `compare.py` expects to live in a folder next to `ComfyUI/` (it moves outputs from `ComfyUI/output/cmp/`). Edit `PROMPTS` to test your own.
 
+## Links
+
+**Krea 2**
+- [Comfy-Org/Krea-2](https://huggingface.co/Comfy-Org/Krea-2): ComfyUI repackaged files (all checkpoints, text encoders, VAE, LoRAs)
+- Diffusion model variants:
+  - [int8_convrot](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_int8_convrot.safetensors), 12.57 GB, RTX 30xx
+  - [fp8_scaled](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_fp8_scaled.safetensors), 12.24 GB, RTX 40xx/50xx
+  - [mxfp8](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_mxfp8.safetensors), 12.6 GB, RTX 50xx
+  - [nvfp4](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_nvfp4.safetensors), 7.15 GB, RTX 50xx
+  - [bf16](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_bf16.safetensors), 24.48 GB
+- [krea/Krea-2-Turbo](https://huggingface.co/krea/Krea-2-Turbo): original weights (gated, Krea 2 Community License)
+- [Krea 2 open-source announcement](https://www.krea.ai/krea-2-open-source) · [Krea 2 technical report](https://www.krea.ai/blog/krea-2-technical-report)
+- [ComfyUI docs: Krea-2 workflow](https://docs.comfy.org/tutorials/image/krea/krea-2) · [official template JSON](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_krea2_turbo_t2i.json)
+
+**Qwen-Image-2.1**
+- [Comfy-Org/Qwen-Image-2.1](https://huggingface.co/Comfy-Org/Qwen-Image-2.1): ComfyUI repackaged files
+- [ComfyUI docs: Qwen-Image-2.1 workflow](https://docs.comfy.org/tutorials/image/qwen/qwen-image-2-1) · [t2i template JSON](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_qwen_image_2_1_t2i.json) · [edit template JSON](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_qwen_image_2_1_image_edit.json)
+- [e-n-v-y/Qwen-Image-2.1-Fix](https://huggingface.co/e-n-v-y/Qwen-Image-2.1-Fix): Fix LoRA and the author's settings workflow
+
+**Context**
+- [Artificial Analysis text-to-image arena (open weights)](https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true)
+- [Aitrepreneur: Qwen Image 2.1 video](https://youtu.be/5Sby8YxbhJc), which argues for Krea 2 for t2i and Qwen 2.1 for editing
+- [ComfyUI](https://github.com/Comfy-Org/ComfyUI) · [Comfy-Org/workflow_templates](https://github.com/Comfy-Org/workflow_templates)
+
 ## Caveats
 
 - 5 prompts × 2 seeds is a sanity check, not a benchmark — judgements above are subjective.
